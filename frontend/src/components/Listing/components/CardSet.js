@@ -1,47 +1,17 @@
 import React, {useState, useEffect} from 'react';
-import {Card, CardActions, CardContent, CardMedia, Button, Typography, List, ListItem, Box, CardHeader, IconButton} from '@mui/material';
+import {Card, CardActions, CardContent, CardMedia, Button, Typography, CardHeader,Box} from '@mui/material';
 import Stack from '@mui/material/Stack';
 import Axios from "axios";
-import data from '../../../Assets/Data/data.json'
-import AddLocationAltIcon from '@mui/icons-material/AddLocationAlt';
-import { useImmerReducer } from "use-immer";
-import { MapContainer, TileLayer, useMap, Marker,Popup,Polygon } from 'react-leaflet'
 import { useNavigate } from "react-router-dom";
 import {Item} from '../../elements/utils/Item'
-
-
+import {styles} from '../../elements/utils/Styles'
 
 export default function ImgMediaCard() {
 
     const navigate = useNavigate();
 
 
-    const initialState = { 
-        
-        mapInstance:null,
-    
-    }
 
-
-    function ReducerFuction(draft, action) {
-        switch (action.type) {
-			
-            case 'getMap':
-                draft.mapInstance = action.mapData;
-                break
-            
-            default: break;
-        }
-    }
-
-    const [state, dispatch] = useImmerReducer(ReducerFuction, initialState);
-
-    function TheMapComponent(){
-        const map = useMap()
-        
-        dispatch({type: 'getMap', mapData: map})
-        return null;
-    }
 
     
 
@@ -69,22 +39,17 @@ export default function ImgMediaCard() {
     return (
         <>  
             {allListings.map((item) =>(
-                <Card sx={{width:'94%',height:'70vh', margin: '0 auto', mt: 2}} key={item.id}>
+                <Card sx={styles.cardset_card} key={item.id}>
 
                     <CardHeader
-                            action={
-                            <IconButton aria-label="settings">
-                                <AddLocationAltIcon/>
-                            </IconButton>
-                            }
+                            sx={styles.cardset_cardheader}
                             title={item.title}
                            
                         />
                     
                 <CardMedia
                     component="img"
-                    alt="green iguana"
-                    height= '50%'
+                    height= '40%'
                     image = {item.picture}
                     
                 />
@@ -95,7 +60,7 @@ export default function ImgMediaCard() {
                     <Stack
                         justifyContent="center"
                         alignItems="center"
-                      
+                        
                         direction={{ xs: 'column', sm: 'row' }}
                         spacing={{ xs: 1, sm: 2, md: 4 }}
                     >
@@ -104,16 +69,19 @@ export default function ImgMediaCard() {
                         <Item>rooms: {item.rooms}</Item>
                         <Item>agency: {item.seller_agency_name}</Item>
                     </Stack>
-                    <Typography variant='body1' sx={{m: 0, fontSize: '.7rem'}}>
+                    <Box sx={{height:'3rem'}}>
+                    <Typography variant='body1' sx={styles.cardset_descr}>
                             {item.description}
                             </Typography>
+                    </Box>
+                    
                 </CardContent>
                 <CardActions>
                     <Button size="small"
-                    onClick={()=>{navigate(`/listings/${item.id}`)}}>More</Button>
+                    onClick={()=>{navigate(`/listings/${item.id}`)}} sx={styles.cardset_btn}>More</Button>
                     <Button 
                         size="small" 
-                        onClick={()=>{navigate(`/agencies/${item.seller}`)}}>Seller</Button>
+                        onClick={()=>{navigate(`/agencies/${item.seller}`)}} sx={styles.cardset_btn}>Seller</Button>
                     
                 </CardActions>
             </Card>

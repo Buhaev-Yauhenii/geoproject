@@ -15,7 +15,7 @@ import Profile from './components/profile/Profile';
 import Agencies from './components/agencies/Agencies';
 import AgencyDetail from './components/agencies/AgencyDetail';
 import ListingDetail from './components/Listing/ListingDetail'
-
+import {initialState} from './components/elements/utils/InitialState'
 
 function App() {
   const initialState = { 

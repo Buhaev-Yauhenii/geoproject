@@ -1,10 +1,10 @@
-import React, {useEffect, useState, useReducer, useContext} from 'react';
+import React, {useEffect, useContext} from 'react';
 import Avatar from '@mui/material/Avatar';
 import Button from '@mui/material/Button';
 import CssBaseline from '@mui/material/CssBaseline';
 import TextField from '@mui/material/TextField';
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
+
+import Snackbar from '@mui/material/Snackbar';
 import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
@@ -19,6 +19,7 @@ import Axios from 'axios';
 import {useImmerReducer} from 'use-immer';
 import DispatchContext from '../../Context/DispatchContext';
 import stateContext from '../../Context/StateContext';
+import {Alert} from '@mui/material'
 
 
 const theme = createTheme();
@@ -34,7 +35,10 @@ export default function SignIn() {
         emailValue:'', 
         passwordValue:'', 
         sendRequest:0,
-        token:''
+        token:'',
+        openSnack: false,
+		disabledBtn: false,
+		serverError: false,
     }
 
 
@@ -45,15 +49,31 @@ export default function SignIn() {
             
             case 'catchEmailChange':
                 draft.emailValue = action.emailChosen;
+                draft.serverError = false;
                 break;
             case 'catchPasswordChange':
                 draft.passwordValue = action.passwordChosen;
+                draft.serverError = false;
                 break;
             case 'changeSetRequest':
                 draft.sendRequest = draft.sendRequest + 1;
                 break;
             case 'catchToken':
                 draft.token = action.tokenValue;
+                break;
+            case "openTheSnack":
+                draft.openSnack = true;
+                break;
+            case "disableTheButton":
+                draft.disabledBtn = true;
+                break;
+    
+            case "allowTheButton":
+                draft.disabledBtn = false;
+                break;
+    
+            case "catchServerError":
+                draft.serverError = true;
                 break;
             default: break;
         }
@@ -64,7 +84,7 @@ export default function SignIn() {
     const handleSubmit = (event) => {
         event.preventDefault();
         dispatch({type: 'changeSetRequest'})
-        console.log('sign in');
+        dispatch({ type: "disableTheButton" });
     };
     useEffect(() => {
 		if (state.sendRequest ){
@@ -80,7 +100,10 @@ export default function SignIn() {
                 dispatch({type: 'catchToken', tokenValue: response.data.auth_token})
                 Globaldispatch({type: 'catchToken', tokenValue: response.data.auth_token})
                 // navigate('/')
-			} catch (error) {}
+			} catch (error) {
+                dispatch({ type: "allowTheButton" });
+				dispatch({ type: "catchServerError" });
+            }
 		}
 		signin();
 		return () => {
@@ -100,7 +123,7 @@ export default function SignIn() {
                     );
                     console.log(response)
                     Globaldispatch({type: 'userSignIn', usernameInfo: response.data.username, emailInfo: response.data.email, idInfo: response.data.id})
-                    navigate('/')
+                    dispatch({type:'openTheSnack'})
                 } catch (error) {}
             }
             getUserInfo();
@@ -110,6 +133,13 @@ export default function SignIn() {
         }
             }, [state.token]);
 
+            useEffect(() => {
+                if (state.openSnack) {
+                    setTimeout(() => {
+                        navigate("/");
+                    }, 1500);
+                }
+            }, [state.openSnack]);
     return (
         <>
             <Navbar/>
@@ -130,6 +160,13 @@ export default function SignIn() {
                         <Typography component="h1" variant="h5">
                             Sign in
                         </Typography>
+
+                        {state.serverError ? (
+					<Alert severity="error">Incorrect username or password!</Alert>
+				) : (
+					""
+				)}
+
                         <Box component="form" onSubmit={handleSubmit} noValidate sx={{mt: 1}}>
                             <TextField
                                 margin="normal"
@@ -142,7 +179,7 @@ export default function SignIn() {
                                 autoFocus
                                 value={state.emailValue}
                                 onChange={(event)=>(dispatch({type: 'catchEmailChange', emailChosen: event.target.value}))}
-                                    
+                                error={state.serverError ? true : false}
                             />
                             <TextField
                                 margin="normal"
@@ -155,6 +192,7 @@ export default function SignIn() {
                                 autoComplete="current-password"
                                 value={state.passwordValue}
                                 onChange={(event)=>(dispatch({type: 'catchPasswordChange', passwordChosen: event.target.value}))}
+                                error={state.serverError ? true : false}
                                     
                             />
                             
@@ -177,7 +215,13 @@ export default function SignIn() {
                             </Grid>
                         </Box>
                     </Box>
-
+                    <Snackbar
+                        sx={{marginTop:'3rem'}}
+                        severity="success"
+                        open={state.openSnack}
+                        message="You Logged in"
+                        anchorOrigin={{vertical:'top', horizontal:'center'}}
+                    />
                 </Container>
             </ThemeProvider>
             <Footer/>

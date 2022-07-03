@@ -9,6 +9,9 @@ import Checkbox from '@mui/material/Checkbox';
 import Link from '@mui/material/Link';
 import Grid from '@mui/material/Grid';
 import Box from '@mui/material/Box';
+import Snackbar from '@mui/material/Snackbar';
+import IconButton from '@mui/material/IconButton';
+import CloseIcon from '@mui/icons-material/Close';
 import LockOutlinedIcon from '@mui/icons-material/LockOutlined';
 import Typography from '@mui/material/Typography';
 import Container from '@mui/material/Container';
@@ -19,6 +22,7 @@ import Axios from 'axios';
 import {useImmerReducer} from 'use-immer';
 import DispatchContext from '../../Context/DispatchContext';
 import stateContext from '../../Context/StateContext';
+
 
 
 const theme = createTheme();
@@ -33,7 +37,31 @@ export default function SignUp() {
         emailValue:'', 
         passwordValue:'', 
         rePasswordValue:'', 
-        sendRequest:0
+        sendRequest:0, 
+        openSnack: false,
+		disabledBtn: false,
+		serverError: false,
+        usernameErrors:{
+            hasErrors: false,
+            errorMessage: ''
+        },
+        emailErrors:{
+            hasErrors: false,
+            errorMessage: ''
+        },
+        passwordErrors:{
+            hasErrors: false,
+            errorMessage: ''
+        },
+        passwordReErrors:{
+            hasErrors: false,
+            errorMessage: ''
+        },
+        serverMessageUsername: "",
+		serverMessageEmail: "",
+		serverMessageSimilarPassword: "",
+		serverMessageCommonPassword: "",
+		serverMessageNumericPassword: "",
     }
 
 
@@ -43,18 +71,103 @@ export default function SignUp() {
         switch (action.type) {
             case 'catchUsernameChange':
                 draft.usernameValue = action.usernameChosen;
+                draft.usernameErrors.hasErrors = false
+                draft.usernameErrors.errorMessage = ''
+                draft.serverMessageUsername = "";
                 break;
             case 'catchEmailChange':
                 draft.emailValue = action.emailChosen;
+                draft.emailErrors.hasErrors = false
+                draft.emailErrors.errorMessage = ''
+                draft.serverMessageEmail = "";
+
                 break;
             case 'catchPasswordChange':
                 draft.passwordValue = action.passwordChosen;
+                draft.passwordErrors.hasErrors = false;
+                draft.passwordErrors.errorMessage = '';
+                draft.serverMessageSimilarPassword = "";
+				draft.serverMessageCommonPassword = "";
+				draft.serverMessageNumericPassword = "";
                 break;
             case 'catchRePasswordChange':
                 draft.rePasswordValue = action.rePasswordChosen;
+                draft.passwordReErrors.hasErrors = false
+                draft.passwordReErrors.errorMessage = ''
                 break;
             case 'changeSetRequest':
                 draft.sendRequest = draft.sendRequest + 1;
+                break;
+            case 'catchToken':
+                draft.token = action.tokenValue;
+                break;
+            case "openTheSnack":
+                draft.openSnack = true;
+                break;
+            case "catchUsernameErrors":
+                if (action.usernameChosen.length === 0){
+                    draft.usernameErrors.hasErrors = true
+                    draft.usernameErrors.errorMessage = "This field can't be empty"
+                } else if (action.usernameChosen.length < 5){
+                    draft.usernameErrors.hasErrors = true
+                    draft.usernameErrors.errorMessage = "username must be at least 5 characters"
+                } else if (!/^([a-zA-Z0-9]+)$/.test(action.usernameChosen,)){
+                    draft.usernameErrors.hasErrors = true
+                    draft.usernameErrors.errorMessage = "This field can't have special characters"
+                }
+                
+                break;
+            case "catchEmailErrors":
+                if (/^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/.test(action.emailChosen)){
+                    draft.emailErrors.hasErrors = true
+                    draft.emailErrors.errorMessage = "you used invalid email address"
+                }
+                break;
+            case 'catchPasswordErrors':
+                if (action.passwordChosen.length === 0){
+                    draft.passwordErrors.hasErrors = true
+                    draft.passwordErrors.errorMessage = "This field can't be empty"
+                } else if (action.passwordChosen.length < 8){
+                    draft.passwordErrors.hasErrors = true
+                    draft.passwordErrors.errorMessage = "password must be at least 8 characters"
+                }
+                break;
+            case "catchPasswordReErrors":
+                if (action.passwordChosen !== action.rePasswordChosen){
+                    draft.passwordReErrors.hasErrors = true
+                    draft.passwordReErrors.errorMessage = "passwords must match"
+                }else if (action.rePasswordChosen.length === 0 ){
+                    draft.passwordReErrors.hasErrors = true
+                    draft.passwordReErrors.errorMessage = "This field can't be empty"
+                }
+                break;
+
+            case "disableTheButton":
+                draft.disabledBtn = true;
+                break;
+            case "allowTheButton":
+                draft.disabledBtn = false;
+                break;
+            case "usernameExists":
+                draft.serverMessageUsername = "This username already exists!";
+                break;
+    
+            case "emailExists":
+                draft.serverMessageEmail = "This email already exists!";
+                break;
+    
+            case "similarPassword":
+                draft.serverMessageSimilarPassword =
+                    "The password is too similar to the username!";
+                break;
+    
+            case "commonPassword":
+                draft.serverMessageCommonPassword = "The password is too common!";
+                break;
+    
+            case "numericPassword":
+                draft.serverMessageNumericPassword =
+                    "The password must not only contain numbers!";
                 break;
             default: break;
         }
@@ -81,18 +194,44 @@ export default function SignUp() {
 				);
                 dispatch({type: 'catchToken', tokenValue: response.data.auth_token})
                 Globaldispatch({type: 'catchToken', tokenValue: response.data.auth_token})
-                
-			} catch (error) {}
+                dispatch({type:'openTheSnack'})
+			} catch (error) {
+                dispatch({type: 'allowTheButton'})
+                if (error.response.data.username) {
+                    dispatch({ type: "usernameExists" });
+                } else if (error.response.data.email) {
+                    dispatch({ type: "emailExists" });
+                } else if (
+                    error.response.data.password[0] ===
+                    "The password is too similar to the username."
+                ) {
+                    dispatch({ type: "similarPassword" });
+                } else if (
+                    error.response.data.password[0] === "This password is too common."
+                ) {
+                    dispatch({ type: "commonPassword" });
+                } else if (
+                    error.response.data.password[0] ===
+                    "This password is entirely numeric."
+                ) {
+                    dispatch({ type: "numericPassword" });
+                }
+            }
 		}
 		reg();
-        navigate('/')
 		return () => {
 			source.cancel();
 		};
 	}
         }, [state.sendRequest]);
 
-   
+    useEffect(() => {
+        if (state.openSnack) {
+            setTimeout(() => {
+                navigate("/");
+            }, 1500);
+        }
+    }, [state.openSnack]);
 
     return (
         <>
@@ -127,6 +266,9 @@ export default function SignUp() {
                                         autoFocus
                                         value={state.usernameValue}
                                         onChange={(event)=>(dispatch({type: 'catchUsernameChange', usernameChosen: event.target.value}))}
+                                        onBlur={(event)=>(dispatch({type: 'catchUsernameErrors', usernameChosen: event.target.value}))}
+                                        error = {state.usernameErrors.hasErrors ? true : false}
+                                        helperText = {state.usernameErrors.errorMessage}
                                     />
                                 </Grid>
                                 <Grid item xs={12}>
@@ -138,6 +280,9 @@ export default function SignUp() {
                                         name="email"
                                         value={state.emailValue}
                                         onChange={(event)=>(dispatch({type: 'catchEmailChange', emailChosen: event.target.value}))}
+                                        onBlur={(event)=>(dispatch({type: 'catchEmailErrors', usernameChosen: event.target.value}))}
+                                        error = {state.emailErrors.hasErrors ? true : false}
+                                        helperText = {state.emailErrors.errorMessage}
                                         
                                     />
                                 </Grid>
@@ -151,6 +296,9 @@ export default function SignUp() {
                                         id="password"
                                         value={state.passwordValue}
                                         onChange={(event)=>(dispatch({type: 'catchPasswordChange', passwordChosen: event.target.value}))}
+                                        onBlur={(event)=>(dispatch({type: 'catchPasswordErrors', passwordChosen: event.target.value}))}
+                                        error = {state.passwordErrors.hasErrors ? true : false}
+                                        helperText = {state.passwordErrors.errorMessage}
                                         
                                     />
                                 </Grid>
@@ -165,6 +313,9 @@ export default function SignUp() {
                                         id="password2"
                                         value={state.rePasswordValue}
                                         onChange={(event)=>(dispatch({type: 'catchRePasswordChange', rePasswordChosen: event.target.value}))}
+                                        onBlur={(event)=>(dispatch({type: 'catchPasswordReErrors', rePasswordChosen: event.target.value}))}
+                                        error = {state.passwordReErrors.hasErrors ? true : false}
+                                        helperText = {state.passwordReErrors.errorMessage}
                                         
                                     />
                                 </Grid>
@@ -187,6 +338,13 @@ export default function SignUp() {
                             </Grid>
                         </Box>
                     </Box>
+                    <Snackbar
+                        sx={{marginTop:'3rem'}}
+                        severity="success"
+                        open={state.openSnack}
+                        message="You Logged in"
+                        anchorOrigin={{vertical:'top', horizontal:'center'}}
+                    />
                 </Container>
             </ThemeProvider>
             <Footer/>

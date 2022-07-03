@@ -2,20 +2,14 @@ import React, { useEffect, useState, useRef, useMemo, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import Axios from "axios";
 import { useImmerReducer } from "use-immer";
-
+import {styles} from '../../elements/utils/Styles'
 import StateContext from "../../../Context/StateContext";
 
 // MUI
 import {
 	Grid,
-	AppBar,
 	Typography,
 	Button,
-	Card,
-	CardHeader,
-	CardMedia,
-	CardContent,
-	CircularProgress,
 	TextField,
 	FormControlLabel,
 	Checkbox,
@@ -300,6 +294,7 @@ function ListingUpdate(props) {
                 <FormControlLabel
                     control={
                         <Checkbox
+                            color="secondary"   
                             checked={state.furnishedValue}
                             onChange={(e) =>
                                 dispatch({
@@ -317,6 +312,7 @@ function ListingUpdate(props) {
                 <FormControlLabel
                     control={
                         <Checkbox
+                            color="secondary"
                             checked={state.poolValue}
                             onChange={(e) =>
                                 dispatch({
@@ -334,6 +330,7 @@ function ListingUpdate(props) {
                 <FormControlLabel
                     control={
                         <Checkbox
+                            color="secondary"
                             checked={state.elevatorValue}
                             onChange={(e) =>
                                 dispatch({
@@ -351,6 +348,7 @@ function ListingUpdate(props) {
                 <FormControlLabel
                     control={
                         <Checkbox
+                            color="secondary"
                             checked={state.cctvValue}
                             onChange={(e) =>
                                 dispatch({
@@ -369,6 +367,7 @@ function ListingUpdate(props) {
                     control={
                         <Checkbox
                             checked={state.parkingValue}
+                            color="secondary"
                             onChange={(e) =>
                                 dispatch({
                                     type: "catchParkingChange",
@@ -393,14 +392,12 @@ function ListingUpdate(props) {
                 fullWidth
                 type="submit"
                 disabled={state.disabledBtn}
+                sx={styles.agency_btn}
             >
                 UPDATE
             </Button>
         </Grid>
     </form>
-    <Button variant="contained" onClick={props.closeDialog} sx={{mt:'2rem'}}>
-        CANCEL
-    </Button>
     <Snackbar
         open={state.openSnack}
         message="You have successfully updated this listing!"

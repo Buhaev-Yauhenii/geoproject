@@ -15,44 +15,20 @@ import work1 from '../../Assets/productHowItWorks1.svg'
 import work2 from '../../Assets/productHowItWorks2.svg'
 import work3 from '../../Assets/productHowItWorks3.svg'
 import Container from '@mui/material/Container';
-
+import {styles} from '../elements/utils/Styles'
 import {useNavigate} from "react-router-dom";
 
-const item = {
-  display: 'flex',
-  flexDirection: 'column',
-  alignItems: 'center',
-  px: 5,
-};
 
-const number = {
-  fontSize: 24,
-  fontFamily: 'default',
-  color: 'secondary.main',
-  fontWeight: 'medium',
-};
-
-const image = {
-  height: 55,
-  my: 4,
-};
 
 function ProductHowItWorks() {
   const navigate = useNavigate();
   return (
     <Box
       component="section"
-      sx={{ display: 'flex', bgcolor: 'secondary.light', overflow: 'hidden' }}
+      sx={styles.howItWorks_section}
     >
       <Container
-        sx={{
-          mt: 10,
-          mb: 15,
-          position: 'relative',
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
+        sx={styles.howItWorks_container}
       >
         
         <Box
@@ -72,57 +48,55 @@ function ProductHowItWorks() {
         <div>
           <Grid container spacing={5}>
             <Grid item xs={12} md={4}>
-              <Box sx={item}>
-                <Box sx={number}>1.</Box>
+              <Box sx={styles.howItWorks_item}>
+                <Box sx={styles.howItWorks_number}>1.</Box>
                 <Box
                   component="img"
                   src={work1}
                   alt="suitcase"
-                  sx={image}
+                  sx={styles.howItWorks_image}
                 />
                 <Typography variant="h5" align="center">
-                  Appointment every Wednesday 9am.
+                  All agencies have the same service
                 </Typography>
               </Box>
             </Grid>
             <Grid item xs={12} md={4}>
-              <Box sx={item}>
-                <Box sx={number}>2.</Box>
+              <Box sx={styles.howItWorks_item}>
+                <Box sx={styles.howItWorks_number}>2.</Box>
                 <Box
                   component="img"
                   src={work2}
                   alt="graph"
-                  sx={image}
+                  sx={styles.howItWorks_image}
                 />
                 <Typography variant="h5" align="center">
-                  First come, first served. Our offers are in limited quantities, so
-                  be quick.
+                advantageous offers for both agencies and buyers 
                 </Typography>
               </Box>
             </Grid>
             <Grid item xs={12} md={4}>
-              <Box sx={item}>
-                <Box sx={number}>3.</Box>
+              <Box sx={styles.howItWorks_item}>
+                <Box sx={styles.howItWorks_number}>3.</Box>
                 <Box
                   component="img"
                   src={work3}
                   alt="clock"
-                  sx={image}
+                  sx={styles.howItWorks_image}
                 />
                 <Typography variant="h5" align="center">
                   {'New offers every week. New experiences, new surprises. '}
-                  {'Your Sundays will no longer be alike.'}
                 </Typography>
               </Box>
             </Grid>
           </Grid>
         </div>
         <Button
-          color="secondary"
+          
           size="large"
           variant="contained"
           component="a"
-          sx={{ mt: 8 }}
+          sx={styles.main_btn}
           onClick={() => navigate("/listings")}
         >
           Get started

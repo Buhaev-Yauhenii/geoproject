@@ -1,17 +1,14 @@
-import React, { useEffect, useRef, useMemo, useContext} from 'react';
-import {Container,  Button, Typography,MenuItem,  Box,Grid,TextField,Avatar,Link} from '@mui/material';
+import React, { useEffect, useContext} from 'react';
+import {Container,  Button, Typography,  Box,Grid,TextField,} from '@mui/material';
 import {createTheme, ThemeProvider} from '@mui/material/styles';
 import Axios from "axios";
 import CssBaseline from '@mui/material/CssBaseline';
 import {useImmerReducer} from 'use-immer';
 import { useNavigate } from "react-router-dom";
-import Navbar from '../elements/Navbar';
+import {styles} from '../elements/utils/Styles';
+import Snackbar from '@mui/material/Snackbar';
 
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
-import { MapContainer, TileLayer, useMap, Marker,Popup,Polygon } from 'react-leaflet'
 import stateContext from '../../Context/StateContext';
-import {areaOptions, innerLondonOptions, outerLondonOptions, listingTypeOptions, propertyStatusOptions, rentalFrequencyOptions} from '../elements/utils/Data'
 
 
 
@@ -116,7 +113,7 @@ function ProfileUpdate(props) {
 				formData.append("seller", GlobalState.userId);
 				try{
 					const response = await Axios.patch(`http://127.0.0.1:8000/api/profiles/${GlobalState.userId}/update/`, formData)
-					navigate('/')
+					
                     dispatch({ type: "openTheSnack" });
 				} catch (e) {
 					dispatch({ type: "allowTheButton" });
@@ -131,7 +128,7 @@ function ProfileUpdate(props) {
 			try{
 				const response = await Axios.get(`http://127.0.0.1:8000/api/profiles/${GlobalState.userId}/`)
 				dispatch({type: 'catchUserProfileInfo', profileObj: response.data})
-
+				
 			} catch(e){
 				console.log(e.response)
 			}
@@ -139,6 +136,13 @@ function ProfileUpdate(props) {
 	}
 	getProfile()
 	},[])
+	useEffect(() => {
+		if (state.openSnack) {
+			setTimeout(() => {
+				navigate("/");
+			}, 1500);
+		}
+	}, [state.openSnack]);
 
     useEffect(() => {
 		if (state.uploadedPicture[0]) {
@@ -171,8 +175,8 @@ function ProfileUpdate(props) {
 					}}
 				>
 					<img
-						src={props.userProfile.profilePic}
-						style={{ height: "5rem", width: "5rem" }}
+						src={props.userProfile.agencyPicture}
+						style={{ height: "6rem" }}
 					/>
 				</Grid>
 			);
@@ -182,11 +186,10 @@ function ProfileUpdate(props) {
     <>
     {console.log(props.userProfile.phone_number)}
          <div>
-            <Typography variant='h4' sx={{textAlign:'center', mt:'1rem'}}> Update profile information</Typography>
-            <Typography sx={{textAlign:'center', mt:'1rem'}}>Note: if you do not want update some profile information, please keep line empty</Typography>
+            <Typography variant='h4' sx={styles.update_title}> Update profile information</Typography>
          </div>
          <ThemeProvider theme={theme}>
-                <Container component="main" maxWidth="xs" sx={{padding:'2rem'}}>
+                <Container component="main" maxWidth="xs" sx={styles.update_main}>
                     <CssBaseline/>
                     <Box
                         sx={{
@@ -245,13 +248,15 @@ function ProfileUpdate(props) {
                             
                                     
                             <Box component='div' sx = {{margin:'0 auto', textAlign: 'center'}}>
-                            
+                            <hr/>
                             <Box>
                             {ProfilePictureDisplay()}
                             </Box>
+							<hr/>
                             <Button
 							variant="contained"
 							component="label"
+							sx={styles.agency_btn}
 							fullWidth
 							
 						>
@@ -269,20 +274,27 @@ function ProfileUpdate(props) {
 							/>
 						</Button>
                             </Box>
-                           
+							<hr/>
 						<Button
 							variant="contained"
 							fullWidth
 							type="submit"
-							
+							sx={styles.agency_btn}
 							disabled={state.disabledBtn}
 						>
 							UPDATE
 						</Button>
-
+						<hr/>
                         </Box>
                     </Box>
-
+					<Snackbar
+				open={state.openSnack}
+				message="Listing succsesfully updated"
+				anchorOrigin={{
+					vertical: "bottom",
+					horizontal: "center",
+				}}
+			/>
                 </Container>
             </ThemeProvider>
     </>

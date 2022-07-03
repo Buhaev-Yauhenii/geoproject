@@ -1,20 +1,18 @@
 import React, { useEffect, useRef, useMemo, useContext} from 'react';
-import {Container,  Button, Typography,MenuItem,  Box,Grid,TextField} from '@mui/material';
-
+import {Container,  Button, Typography,MenuItem,  Box,Grid,TextField,Alert} from '@mui/material';
+import {styles} from '../elements/utils/Styles'
 import Axios from "axios";
 import CssBaseline from '@mui/material/CssBaseline';
 import {useImmerReducer} from 'use-immer';
 import { useNavigate } from "react-router-dom";
 import Navbar from '../elements/Navbar';
-
+import Snackbar from '@mui/material/Snackbar';
 import FormControlLabel from '@mui/material/FormControlLabel';
 import Checkbox from '@mui/material/Checkbox';
 import { MapContainer, TileLayer, useMap, Marker,Popup,Polygon } from 'react-leaflet'
 import stateContext from '../../Context/StateContext';
 import {areaOptions, innerLondonOptions, outerLondonOptions, listingTypeOptions, propertyStatusOptions, rentalFrequencyOptions} from '../elements/utils/Data'
-
-import {initialState} from '../elements/utils/InitialState'
-import {ReducerFuction} from '../elements/utils/Reducer'
+import Footer from '../elements/Footer'
 
 
 // Boroughs
@@ -58,15 +56,355 @@ import Waltham from "../../Assets/Boroughs/Waltham";
 
 function NewListing() {
     const navigate = useNavigate();
+	const initialState = { 
+		titleValue: "",
+		listingTypeValue: "",
+		descriptionValue: "",
+		areaValue: "",
+		boroughValue: "",
+		latitudeValue: "",
+		longitudeValue: "",
+		propertyStatusValue: "",
+		priceValue: "",
+		rentalFrequencyValue: "",
+		roomsValue: "",
+		furnishedValue: false,
+		poolValue: false,
+		elevatorValue: false,
+		cctvValue: false,
+		parkingValue: false,
+		pictureValue: "",
+		mapInstance:null,
+		markerPosition:{lat: '51.51', lng: '-0.0782'}, 
+		uploadedImages:[],
+		sendRequest: 0,
+		userProfile: {
+			agencyName: '', 
+			phone: '',
+			agencyPicture:'',
+			bio: '',
+			sellerId:'',
+			sellerListings:''
+		},
+		dataIsLoading: true,
+		listingInfo: "",
+		sellerProfileInfo: "",
+		openSnack: false,
+		disabledBtn: false,
+		agencyNameValue: '', 
+		phoneValue:'', 
+		bioValue:'', 
+		uploadedPictureProfileValue: [],
+		profilePicture:'',
+		token:'',
+		titleErrors: {
+			hasErrors: false,
+			errorMessage: "",
+		},
+		listingTypeErrors: {
+			hasErrors: false,
+			errorMessage: "",
+		},
+		propertyStatusErrors: {
+			hasErrors: false,
+			errorMessage: "",
+		},
+		priceErrors: {
+			hasErrors: false,
+			errorMessage: "",
+		},
+		areaErrors: {
+			hasErrors: false,
+			errorMessage: "",
+		},
+		boroughErrors: {
+			hasErrors: false,
+			errorMessage: "",
+		},
+	}
 
+	function ReducerFuction(draft, action) {
+		switch (action.type) {
+			case 'changeRequest':
+				draft.sendRequest = draft.sendRequest + 1
+				break;
+			case 'catchTitleChange':
+				draft.titleValue = action.titleChosen;
+				draft.titleErrors.hasErrors = false;
+				draft.titleErrors.errorMessage = "";
+				break;
+			case "catchListingTypeChange":
+				draft.listingTypeValue = action.listingTypeChosen;
+				draft.listingTypeErrors.hasErrors = false;
+				draft.listingTypeErrors.errorMessage = "";
+				break;
+			case "catchDescriptionChange":
+				draft.descriptionValue = action.descriptionChosen;
+				break;
+			case "catchAreaChange":
+				draft.areaValue = action.areaChosen;
+				draft.areaErrors.hasErrors = false;
+				draft.areaErrors.errorMessage = "";
+				break;
+			case "catchBoroughChange":
+				draft.boroughValue = action.boroughChosen;
+				draft.boroughErrors.hasErrors = false;
+				draft.boroughErrors.errorMessage = "";
+				break;
+			case "catchLatitudeChange":
+				draft.latitudeValue = action.latitudeChosen;
+				break;
+	
+			case "catchLongitudeChange":
+				draft.longitudeValue = action.longitudeChosen;
+				break;
+	
+			case "catchPropertyStatusChange":
+				draft.propertyStatusValue = action.propertyStatusChosen;
+				draft.propertyStatusErrors.hasErrors = false;
+				draft.propertyStatusErrors.errorMessage = "";
+				break;
+	
+			case "catchPriceChange":
+				draft.priceValue = action.priceChosen;
+				draft.priceErrors.hasErrors = false;
+				draft.priceErrors.errorMessage = "";
+				break;
+			case "catchRentalFrequencyChange":
+				draft.rentalFrequencyValue = action.rentalFrequencyChosen;
+				break;
+	
+			case "catchRoomsChange":
+				draft.roomsValue = action.roomsChosen;
+				break;
+	
+			case "catchFurnishedChange":
+				draft.furnishedValue = action.furnishedChosen;
+				break;
+	
+			case "catchPoolChange":
+				draft.poolValue = action.poolChosen;
+				break;
+	
+			case "catchElevatorChange":
+				draft.elevatorValue = action.elevatorChosen;
+				break;
+	
+			case "catchCctvChange":
+				draft.cctvValue = action.cctvChosen;
+				break;
+	
+			case "catchParkingChange":
+				draft.parkingValue = action.parkingChosen;
+				break;
+			case 'getMap':
+				draft.mapInstance = action.mapData;
+				break
+			case "catchPictureChange":
+				draft.pictureValue = action.picture1Chosen[0];
+				break;
+			case "changeMarkerPosition":
+				draft.markerPosition.lat = action.changeLatitude;
+				draft.markerPosition.lng = action.changeLongitude;
+				draft.latitudeValue = draft.markerPosition.lat;
+				draft.longitudeValue = draft.markerPosition.lng;
+				
+				break;
+			case 'catchUploadedPictures':
+				draft.uploadedImages = action.imagesChosen
+				break;
+			case 'catchUserProfileInfo': 
+				draft.userProfile.agencyName = action.profileObj.agency_name
+				draft.userProfile.phone = action.profileObj.phone_number
+				draft.userProfile.agencyPicture = action.profileObj.profile_picture
+				draft.userProfile.bio = action.profileObj.biography
+				draft.userProfile.sellerListings = action.profileObj.seller_listings
+				draft.userProfile.sellerId = action.profileObj.seller
+				break
+			case 'catchAgencyNameChange':
+				
+					draft.agencyNameValue = action.agencyNameChosen
+				
+				break;
+			case 'catchAgencyNameChangeClick':
+				if (action.agencyNameChosen !== draft.userProfile.agencyName){
+					draft.agencyNameValue = action.agencyNameChosen
+				}
+				else if(!action.agencyNameChosen){
+					draft.agencyNameValue = draft.userProfile.agencyName}
+				else{
+					draft.agencyNameValue = draft.userProfile.agencyName
+				}
+				break;
+	
+			case 'catchPhoneChange':
+				draft.phoneValue = action.phoneChosen
+				break;
+			case 'catchBioChange':
+				draft.bioValue = action.bioChosen
+				break;
+			case 'catchPictureProfileChange':
+				draft.uploadedPictureProfileValue = action.pictureProfileChosen
+				break;
+			
+			case 'catchProfilePicture':
+				draft.profilePicture = action.profilePictureChosen
+				break;
+	
+			case  'catchListingInfo':
+				draft.listingInfo = action.listingObject
+				break;
+	
+			case "loadingDone":
+					draft.dataIsLoading = false;
+					break;
+	
+			case "catchSellerProfileInfo":
+				draft.sellerProfileInfo = action.profileObject;
+				break;
+	
+			case "openTheSnack":
+				draft.openSnack = true;
+				break;
+	
+			case "disableTheButton":
+				draft.disabledBtn = true;
+				break;
+	
+			case "allowTheButton":
+				draft.disabledBtn = false;
+				break;
+	
+	
+			case "catchTitleChange":
+				draft.titleValue = action.titleChosen;
+				break;
+	
+	
+			case "changeSendRequest":
+				draft.sendRequest = draft.sendRequest + 1;
+				break;
+			
+			case 'catchToken':
+				draft.token = action.tokenValue;
+				break; 
+	
+			case "catchTitleErrors":
+				if (action.titleChosen.length === 0) {
+					draft.titleErrors.hasErrors = true;
+					draft.titleErrors.errorMessage = "This field must not be empty";
+				}
+				break;
+	
+			case "catchListingTypeErrors":
+				if (action.listingTypeChosen.length === 0) {
+					draft.listingTypeErrors.hasErrors = true;
+					draft.listingTypeErrors.errorMessage = "This field must not be empty";
+				}
+				break;
+	
+			case "catchPropertyStatusErrors":
+				if (action.propertyStatusChosen.length === 0) {
+					draft.propertyStatusErrors.hasErrors = true;
+					draft.propertyStatusErrors.errorMessage =
+						"This field must not be empty";
+				}
+				break;
+	
+			case "catchPriceErrors":
+				if (action.priceChosen.length === 0) {
+					draft.priceErrors.hasErrors = true;
+					draft.priceErrors.errorMessage = "This field must not be empty";
+				}
+				break;
+	
+			case "catchAreaErrors":
+				if (action.areaChosen.length === 0) {
+					draft.areaErrors.hasErrors = true;
+					draft.areaErrors.errorMessage = "This field must not be empty";
+				}
+				break;
+	
+			case "catchBoroughErrors":
+				if (action.boroughChosen.length === 0) {
+					draft.boroughErrors.hasErrors = true;
+					draft.boroughErrors.errorMessage = "This field must not be empty";
+				}
+				break;
+	
+			case "emptyTitle":
+				draft.titleErrors.hasErrors = true;
+				draft.titleErrors.errorMessage = "This field must not be empty";
+				break;
+	
+			case "emptyListingType":
+				draft.listingTypeErrors.hasErrors = true;
+				draft.listingTypeErrors.errorMessage = "This field must not be empty";
+				break;
+	
+			case "emptyPropertyStatus":
+				draft.propertyStatusErrors.hasErrors = true;
+				draft.propertyStatusErrors.errorMessage =
+					"This field must not be empty";
+				break;
+	
+			case "emptyPrice":
+				draft.priceErrors.hasErrors = true;
+				draft.priceErrors.errorMessage = "This field must not be empty";
+				break;
+	
+			case "emptyArea":
+				draft.areaErrors.hasErrors = true;
+				draft.areaErrors.errorMessage = "This field must not be empty";
+				break;
+	
+			case "emptyBoroug":
+				draft.borougErrors.hasErrors = true;
+				draft.borougErrors.errorMessage = "This field must not be empty";
+				break;	
+			default: break;
+
+		}
+	}
+	
 	
 
 
-    const [state, dispatch] = useImmerReducer(ReducerFuction, initialState);
+	const [state, dispatch] = useImmerReducer(ReducerFuction, initialState);
 
     const handleSubmit = (event) => {
         event.preventDefault();
-    
+		if (
+			!state.titleErrors.hasErrors &&
+			!state.listingTypeErrors.hasErrors &&
+			!state.propertyStatusErrors.hasErrors &&
+			!state.priceErrors.hasErrors &&
+			!state.areaErrors.hasErrors &&
+			!state.boroughErrors.hasErrors &&
+			state.latitudeValue &&
+			state.longitudeValue
+		) {
+			dispatch({ type: "changeSendRequest" });
+			dispatch({ type: "disableTheButton" });
+		} else if (state.titleValue === "") {
+			dispatch({ type: "emptyTitle" });
+			window.scrollTo(0, 0);
+		} else if (state.listingTypeValue === "") {
+			dispatch({ type: "emptyListingType" });
+			window.scrollTo(0, 0);
+		} else if (state.propertyStatusValue === "") {
+			dispatch({ type: "emptyPropertyStatus" });
+			window.scrollTo(0, 0);
+		} else if (state.priceValue === "") {
+			dispatch({ type: "emptyPrice" });
+			window.scrollTo(0, 0);
+		} else if (state.areaValue === "") {
+			dispatch({ type: "emptyArea" });
+			window.scrollTo(0, 0);
+		} else if (state.boroughValue === "") {
+			dispatch({ type: "emptyBorough" });
+			window.scrollTo(0, 0);
+		}
 		dispatch({type: 'changeRequest', })
         console.log('success');
     };
@@ -93,6 +431,9 @@ function NewListing() {
 	}
 	getProfile()
 	},[])
+
+	
+
     // Changing the map view depending on the chosen borough
 
     useEffect(() => {
@@ -449,7 +790,11 @@ function NewListing() {
 					formData.append("seller", GlobalState.userId);
 				try{
 					const response = await Axios.post('http://127.0.0.1:8000/api/listings/create/', formData)
-					navigate('/')
+					console.log(response.data);
+					
+					dispatch({type:'openTheSnack'})
+					console.log(state.openSnack)
+					
 				}catch(e){
 					
 				}
@@ -457,6 +802,14 @@ function NewListing() {
 			AddProperty();
 		}
 	}, [state.sendRequest])
+
+	useEffect(() => {
+        if (state.openSnack) {
+            setTimeout(() => {
+                navigate("/");
+            }, 1500);
+        }
+    }, [state.openSnack]);
 
 	function SubmitButton(){
 		if(GlobalState.userIsLogged && state.userProfile.agencyName !== null && state.userProfile.agencyName !== ''
@@ -466,7 +819,7 @@ function NewListing() {
 			
 			fullWidth
 			variant="contained"
-			sx={{textAlign:'center',mt: 3, mb: 2, width:'30%'}}
+			sx={styles.agency_btn}
 		>
 			Submit
 		</Button>)
@@ -520,6 +873,14 @@ function NewListing() {
                                         
                                         value={state.titleValue}
                                         onChange={(event)=>(dispatch({type: 'catchTitleChange', titleChosen: event.target.value}))}
+										onBlur={(e) =>
+											dispatch({
+												type: "catchTitleErrors",
+												titleChosen: e.target.value,
+											})
+										}
+										error={state.titleErrors.hasErrors ? true : false}
+										helperText={state.titleErrors.errorMessage}
                                     />
                                 </Grid>
 								
@@ -535,6 +896,7 @@ function NewListing() {
                                         label="description"
                                         value={state.descriptionValue}
                                         onChange={(event)=>(dispatch({type: 'catchDescriptionChange', descriptionChosen: event.target.value}))}
+										
                                     />
                                 </Grid>
                                 <Grid item xs={6} sm={6}>
@@ -549,6 +911,15 @@ function NewListing() {
                                         select
                                         value={state.listingTypeValue}
                                         onChange={(event)=>(dispatch({type: 'catchListingTypeChange', listingTypeChosen: event.target.value}))}
+										onBlur={(e) =>
+											dispatch({
+												type: "catchListingTypeErrors",
+												listingTypeChosen: e.target.value,
+											})
+										}
+										error={state.listingTypeErrors.hasErrors ? true : false}
+										helperText={state.listingTypeErrors.errorMessage}
+										
                                     >
 										{listingTypeOptions.map((option) => (
                                             <MenuItem key={option.value} value={option.value}>
@@ -567,6 +938,11 @@ function NewListing() {
                                         select
                                         value={state.propertyStatusValue}
                                         onChange={(event)=>(dispatch({type: 'catchPropertyStatusChange', propertyStatusChosen: event.target.value}))}
+										onBlur={(e) =>
+											dispatch({
+												type: "catchPropertyStatusErrors",
+												propertyStatusChosen: e.target.value,
+											})}
 										
                                     >
 										{propertyStatusOptions.map((option) => (
@@ -725,6 +1101,8 @@ function NewListing() {
                                         autoFocus
                                         value={state.areaValue}
                                         onChange={(event)=>(dispatch({type: 'catchAreaChange', areaChosen: event.target.value}))}
+										error={state.areaErrors.hasErrors ? true : false}
+										helperText={state.areaErrors.errorMessage}
                                     >
                                         {areaOptions.map((option) => (
                                             <MenuItem key={option.value} value={option.value}>
@@ -746,6 +1124,14 @@ function NewListing() {
                                         
                                         value={state.boroughValue}
                                         onChange={(event)=>(dispatch({type: 'catchBoroughChange', boroughChosen: event.target.value}))}
+										onBlur={(e) =>
+											dispatch({
+												type: "catchBoroughErrors",
+												boroughChosen: e.target.value,
+											})
+										}
+										error={state.boroughErrors.hasErrors ? true : false}
+										helperText={state.boroughErrors.errorMessage}
                                     >
                                         {state.areaValue === 'Inner London' ? 
                                             innerLondonOptions.map((option) => (
@@ -756,6 +1142,16 @@ function NewListing() {
                                     </TextField>
                                 </Grid>
                                 <Grid item container sx = {{height: '25rem', mt:'1rem'}}>
+								{state.latitudeValue && state.longitudeValue ? (
+						<Alert severity="success">
+							You property is located @ {state.latitudeValue},{" "}
+							{state.longitudeValue}
+						</Alert>
+					) : (
+						<Alert severity="warning">
+							Locate your property on the map before submitting this form
+						</Alert>
+					)}
                                 <MapContainer center={[51.505, -0.09]} zoom={13} scrollWheelZoom={false}>
                                     <TileLayer
                                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -778,7 +1174,7 @@ function NewListing() {
                                 fullWidth
 								component='label'
                                 variant="contained"
-                                sx={{textAlign:'center',mt: 3, mb: 2, width:'30%'}}
+                                sx={styles.agency_btn}
                             >
 								<input type='file' accept="image/png, image/jpeg, image/gif" hidden onChange={(event)=>(dispatch({type: 'catchPictureChange', picture1Chosen: event.target.files}))}/>
                                 upload image
@@ -795,7 +1191,15 @@ function NewListing() {
                             
                         </Box>
                     </Box>
+					<Snackbar
+                        sx={{marginTop:'3rem'}}
+                        severity="success"
+                        open={state.openSnack}
+                        message="Listing add to the base"
+                        anchorOrigin={{vertical:'top', horizontal:'center'}}
+                    />
                 </Container>
+				<Footer/>
     </>
   )
 }

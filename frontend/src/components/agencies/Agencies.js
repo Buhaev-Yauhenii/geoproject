@@ -1,25 +1,16 @@
-import React, { useEffect, useRef, useMemo, useContext,useState} from 'react';
-import {Card, CardActions, CardContent, Stack,  CardMedia, Button, Typography, List, ListItem, Box, CardHeader, Grid} from '@mui/material';
-import {createTheme, ThemeProvider} from '@mui/material/styles';
+import React, { useEffect,  useContext,useState} from 'react';
+import {Card, CardActions, CardContent, Stack,  CardMedia, Button, Typography,  CardHeader, Grid,Box} from '@mui/material';
 import Axios from "axios";
-import CssBaseline from '@mui/material/CssBaseline';
 import {useImmerReducer} from 'use-immer';
 import { useNavigate } from "react-router-dom";
 import Navbar from '../elements/Navbar';
 import Paper from '@mui/material/Paper';
 import { styled } from '@mui/material/styles';
 import Footer from '../elements/Footer';
-
-
-import FormControlLabel from '@mui/material/FormControlLabel';
-import Checkbox from '@mui/material/Checkbox';
-import { MapContainer, TileLayer, useMap, Marker,Popup,Polygon } from 'react-leaflet'
 import stateContext from '../../Context/StateContext';
-import {areaOptions, innerLondonOptions, outerLondonOptions, listingTypeOptions, propertyStatusOptions, rentalFrequencyOptions} from '../elements/utils/Data'
-
 import {initialState} from '../elements/utils/InitialState'
 import {ReducerFuction} from '../elements/utils/Reducer'
-
+import {styles} from '../elements/utils/Styles'
 function Agencies() {
     const navigate = useNavigate();
     const [state, dispatch] = useImmerReducer(ReducerFuction, initialState);
@@ -59,14 +50,14 @@ function Agencies() {
     <Navbar/>
     <Grid container spacing={3}>
     {allProfiles.map((item) =>(
+       item.agency_name ?(
         <Grid item xs={6}>
-                <Card sx={{width:'100%',height:'70vh', margin: '0 auto', mt: 2}} key={item.id}>
+                <Card sx={styles.cardset_card} key={item.id}>
                     <CardHeader title={item.agency_name}/>
                     
                     
                 <CardMedia
                     component="img"
-                    alt="green iguana"
                     height= '50%'
                     image = {item.profile_picture}
                     
@@ -87,19 +78,21 @@ function Agencies() {
                         <Item>listings number: {item.seller_listings.length}</Item>
                         
                     </Stack>
-                    <Typography variant='body1' sx={{m: 0, fontSize: '.7rem'}}>
+                    <Box sx={{height:'3rem'}}>
+                    <Typography variant='body1' sx={styles.cardset_descr}>
                             {item.biography}
-                            </Typography>
+                            </Typography></Box>
                 </CardContent>
                 <CardActions>
                     <Button
                      size="small"
                      onClick={()=>{navigate(`/agencies/${item.seller}`)}}
+                     sx={styles.cardset_btn}
                      >More</Button>
                     
                 </CardActions>
             </Card>
-            </Grid>
+            </Grid>) : ''
             ))
              }
              </Grid>

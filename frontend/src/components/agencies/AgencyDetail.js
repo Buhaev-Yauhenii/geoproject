@@ -1,19 +1,17 @@
-import React, { useEffect, useRef, useMemo, useContext} from 'react';
-import {Card, CardActions, CardContent, CardMedia, Button, Typography, List, ListItem, Box, CardHeader, IconButton,Stack, Grid} from '@mui/material';
-import {createTheme, ThemeProvider} from '@mui/material/styles';
+import React, { useEffect, useContext} from 'react';
+import {Card, CardActions, CardContent, CardMedia, Button, Typography,  Box, CardHeader,Stack, Grid} from '@mui/material';
+import {createTheme} from '@mui/material/styles';
 import Axios from "axios";
-import CssBaseline from '@mui/material/CssBaseline';
 import {useImmerReducer} from 'use-immer';
 import { useNavigate, useParams } from "react-router-dom";
 import Navbar from '../elements/Navbar';
-import { styled } from '@mui/material/styles';
-import Paper from '@mui/material/Paper';
+import Footer from '../elements/Footer'
+import {styles} from '../elements/utils/Styles'
 import {Item} from '../elements/utils/Item'
-import Dialog from '@mui/material/Dialog';
+
 
 
 import stateContext from '../../Context/StateContext';
-import {areaOptions, innerLondonOptions, outerLondonOptions, listingTypeOptions, propertyStatusOptions, rentalFrequencyOptions} from '../elements/utils/Data'
 
 import {initialState} from '../elements/utils/InitialState'
 import {ReducerFuction} from '../elements/utils/Reducer'
@@ -59,41 +57,41 @@ function AgencyDetail(props) {
   return (<>
   
   <Navbar/>
-  <Typography variant='h4' sx={{textAlign: 'center',}}>{state.userProfile.agencyName}</Typography>
-                <Grid container   justifyContent="space-around"
->
+  <Typography variant='h4' sx={styles.listing_detail_title}>{state.userProfile.agencyName}</Typography>
+  <hr style={{width: '60%', backgroundColor:'#efefef', borderColor:'rgb(239, 239, 239, 0.3)'}}/>
+                <Grid container   justifyContent="space-around">
                     <Grid item sx={4}>
                     <Box  sx={{marginLeft: '5rem'}} >
 
-                        <img src={state.userProfile.agencyPicture} style = {{width:'20rem', marginRight:'3rem', marginTop:'1rem'}}/>
+                        <img src={state.userProfile.agencyPicture} style = {{width:'30rem', marginRight:'3rem', marginTop:'1rem'}}/>
                     </Box>
 
                     </Grid>
                     <Grid item xs={6}>
-                    <Box  sx={{marginLeft: '5rem'}}>
+                    <Box  sx={{marginLeft: '5rem', marginTop: '1rem'}}>
                         <Typography variant='h4'>Phone:</Typography>
                             <p> {state.userProfile.phone}</p>
                             <Typography variant='h4'>Description:</Typography>
-                            <p>{state.userProfile.bio}</p>
+                            <p style={{textAlign: 'justify'}}>{state.userProfile.bio}</p>
                     </Box>
                     </Grid>
                     </Grid>
-                   <Grid container>
+                    <hr style={{width: '60%', backgroundColor:'#efefef', borderColor:'rgb(239, 239, 239, 0.3)'}}/>
+                   <Grid container spacing={12}>
 
                     {state.userProfile.sellerListings.length>0 ? state.userProfile.sellerListings.map((item) =>(
                         <Grid item xs={4}>
-                <Card sx={{width:'94%',height:'70vh', margin: '0 auto', mt: 2}} key={item.id}>
+                <Card sx={styles.cardset_card_widther} key={item.id}>
 
                     <CardHeader
                             
                             title={item.title}
                            
-                        />
+                       sx={{height: '2rem'}} />
                     
                 <CardMedia
                     component="img"
-                    alt="green iguana"
-                    height= '50%'
+                    height= '40%'
                     image = {`http://127.0.0.1:8000${item.picture}`}
                     
                 />
@@ -118,7 +116,7 @@ function AgencyDetail(props) {
                             </Typography>
                 </CardContent>
                 <CardActions>
-                    <Button size="small" onClick={()=>{navigate(`/listings/${item.id}`)}}>More</Button>
+                    <Button size="small" sx={styles.cardset_btn} onClick={()=>{navigate(`/listings/${item.id}`)}}>More</Button>
                   
                     
                 </CardActions>
@@ -129,6 +127,7 @@ function AgencyDetail(props) {
              : ''}
              
              </Grid>
+             <Footer/>
     </>
   )
 }

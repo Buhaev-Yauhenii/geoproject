@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'djoser',
     'listings.apps.ListingsConfig',
     'users.apps.UsersConfig',
+    'reviews.apps.ReviewsConfig',
 ]
 
 MIDDLEWARE = [

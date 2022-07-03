@@ -9,7 +9,7 @@ import {
 
 import {useTheme} from '@mui/material/styles';
 import {Link, useNavigate} from "react-router-dom";
-
+import {styles} from '../elements/utils/Styles'
 import backgroundCity from '../../Assets/city.jpg'
 
 function Header() {
@@ -22,23 +22,21 @@ function Header() {
     if (display_lg || display_md || display_sm) {
         return (
             <>
-                <Box component='header'>
-                    <Typography variant="h1" align='center' sx={{
-                        fontSize: '6rem',
-                        color: '#fff',
-                        letterSpacing: '.3rem',
-                        pt: '10rem',
-                        backgroundImage: `url(${backgroundCity})`,
-                        width: '100%',
-                        height: '60vh',
-                        backgroundSize: 'cover'
-                    }}>
-                        Geoproject
+                <Box component='header' sx={styles.header_container}>
+                    <Typography variant="h1" align='center' sx={
+                       styles.header_title
+                    }>
+                        Your apartments
+                    </Typography>
+                    <Typography variant="h1" align='center' sx={
+                       styles.header_subtitle
+                    }>
+                        our concern
                     </Typography>
                 </Box>
-                <Box sx={{height: '12vh', width: '100%', backgroundColor: '#000'}}>
+               
 
-                </Box>
+                
             </>
         )
     } else {

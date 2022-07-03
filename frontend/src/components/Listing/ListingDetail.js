@@ -1,24 +1,18 @@
-import React, { useEffect, useRef, useMemo,useState, useContext} from 'react';
-import {Container,  Typography,Link,  Box,Grid,Breadcrumbs, Button, TextField} from '@mui/material';
+import React, { useEffect, useState, useContext} from 'react';
+import {Container,  Typography,Link,  Box,Grid,Breadcrumbs, Button, } from '@mui/material';
 
 import Axios from "axios";
-import CssBaseline from '@mui/material/CssBaseline';
 import {useImmerReducer} from 'use-immer';
 import { useNavigate,useParams } from "react-router-dom";
 import Navbar from '../elements/Navbar';
 import {Item} from '../elements/utils/Item'
-import { createTheme, ThemeProvider, styled } from '@mui/material/styles';
 import Footer from '../elements/Footer';
 import Dialog from '@mui/material/Dialog';
-import DialogActions from '@mui/material/DialogActions';
-import DialogContent from '@mui/material/DialogContent';
-import DialogContentText from '@mui/material/DialogContentText';
-import DialogTitle from '@mui/material/DialogTitle';
 import ListingUpdate from './components/ListingUpdate'
 
 import { MapContainer, TileLayer, useMap, Marker,Popup,Polygon } from 'react-leaflet'
 import stateContext from '../../Context/StateContext';
-
+import {styles} from '../elements/utils/Styles'
 
 import {initialState} from '../elements/utils/InitialState'
 import {ReducerFuction} from '../elements/utils/Reducer'
@@ -121,7 +115,7 @@ function ListingDetail() {
     
     <>
     <Navbar/>
-    <Box>
+    <Box >
         <Breadcrumbs aria-label="breadcrumb">
             <Link underline="hover" color="inherit" onClick={()=>navigate('/listings/')}>
                 listings
@@ -129,11 +123,29 @@ function ListingDetail() {
             <Typography color="text.primary">{state.listingInfo.title}</Typography>
         </Breadcrumbs>
     </Box>
-    <Typography variant='h1' sx={{textAlign: 'center'}}>{state.listingInfo.title}</Typography>
+    <Grid container spacing={12} sx={styles.cardset_box} alignItems="center">
+        <Grid item xs={9}><Typography variant='h2' sx={styles.listing_detail_title}>{state.listingInfo.title}</Typography></Grid>
+        {parseInt(GlobalState.userId) === state.listingInfo.seller ? (<Grid item xs={3}>
+                    
+                    <Button variant="contained" sx={styles.agency_btn} onClick={deleteListing}>delete</Button>
+                   
+                        <Button variant="contained" onClick={handleClickOpen} sx={styles.agency_btn}>
+                            Update
+                        </Button>
+                        <Dialog open={open} onClose={handleClose} sx={{margin:'0 auto'}}>
+                            <ListingUpdate listingData={state.listingInfo} />
+                        </Dialog>
+               
+                </Grid>) : ''}
+       
+    </Grid>
+    <hr style={{width: '60%', backgroundColor:'#efefef', borderColor:'rgb(239, 239, 239, 0.3)'}}/>
+    
+    
     <Grid container>
         <Grid item xs={6}><Container fixed>
-            <Box sx={{height: '73vh', backgroundColor: 'red', margin: '0 auto', mt: 2, }}>
-                <MapContainer center={position} zoom={13} scrollWheelZoom={false}>
+            <Box sx={{height: '57vh', backgroundColor: 'red', margin: '0 auto', mt: 2, }}>
+                <MapContainer center={position} zoom={13} scrollWheelZoom={true}>
                     <TileLayer
                         attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
                         url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
@@ -153,46 +165,35 @@ function ListingDetail() {
                         </Marker>
                    
                 </MapContainer>
+
             </Box>
-            </Container></Grid>
+            </Container>
+            <Typography sx={styles.listing_detail_description}><Typography variant='h6' sx={styles.listing_detail_info}>description:</Typography><br></br>{state.listingInfo.description}</Typography></Grid>
         <Grid item xs={6} alignItems="flex-start" sx={{pt:'1rem'}}>
             <Container>
             <Box component='div' sx={{textAlign:'center'}} >
                 <img src={state.listingInfo.picture} style={{width:'85vh'}}/>
             </Box>
+            <Typography variant='h6' sx={styles.listing_detail_info}>Agency info:</Typography>
             <Grid container spacing={2} sx={{mt:'1rem'}}>
+                
                 <Grid item xs={6}>
-                <Item key={state.listingInfo.id} elevation={4} sx={{cursor:'pointer'}} onClick={()=>{navigate(`/agencies/${state.sellerProfileInfo.seller}`)}}>
+                
+                <Item key={state.listingInfo.id} elevation={4} sx={styles.listing_detail_agency} onClick={()=>{navigate(`/agencies/${state.sellerProfileInfo.seller}`)}}>
                   {`Agency: ${state.listingInfo.seller_agency_name}`}
                 </Item>
                 
                 </Grid>
+               
                 <Grid item xs={6}>
                 <Item key={state.listingInfo.id} elevation={4}>
                 {`Phone: ${state.sellerProfileInfo.phone_number}`}
                 </Item>
                 </Grid>
                
-                {parseInt(GlobalState.userId) === state.listingInfo.seller ? (<Grid item xs={6}>
-                    
-                    <Button variant="contained" sx={{mr:'1rem'}} onClick={deleteListing}>delete</Button>
-                   
-                        <Button variant="contained" onClick={handleClickOpen}>
-                            Update
-                        </Button>
-                        <Dialog open={open} onClose={handleClose} sx={{margin:'0 auto'}}>
-                            <ListingUpdate listingData={state.listingInfo} />
-                        </Dialog>
-               
-                </Grid>) : ''}
-            </Grid>
                 
-            <Typography variant='h6' sx={{mt:'1rem'}}>Description:</Typography>
-            <Typography >{state.listingInfo.description}</Typography>
-
-            <Typography variant='h6'>Locations:</Typography>
-            <Typography variant='body2'>{`${state.listingInfo.area}, ${state.listingInfo.borough}`}</Typography>
-
+            </Grid>
+                    <Typography variant='h6' sx={styles.listing_detail_info}>Main info:</Typography>
             <Grid container spacing={2} sx={{mt:'1rem'}}>
                 <Grid item xs={6}>
                 <Item key={state.listingInfo.id} elevation={4}>

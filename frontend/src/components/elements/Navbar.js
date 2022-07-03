@@ -2,7 +2,7 @@ import React, {useState, useContext} from "react";
 import {Link} from "react-router-dom";
 import DispatchContext from '../../Context/DispatchContext';
 import stateContext from '../../Context/StateContext';
-
+import {styles} from '../elements/utils/Styles'
 // MUI imports
 import {
     Accordion,
@@ -53,10 +53,10 @@ function MenuForSmallDisplay() {
     return (
         <div>
             <Box sx={{flexGrow: 1, }}>
-                <AppBar position="static" sx={{backgroundColor:'#ed6b04'}} >
+                <AppBar position="static" sx={styles.navMenuBar} >
                     <Toolbar>
                         <Button onClick={() => navigate("/")}>
-                            <Avatar sx={{bgcolor: deepOrange[500]}}>N</Avatar>
+                            <Avatar sx={styles.navMenuAvatar}>N</Avatar>
                         </Button>
                         <Button
                             id="basic-button"
@@ -88,7 +88,7 @@ function MenuForSmallDisplay() {
                             <MenuItem
                                 sx={{backgroundColor: 'black', color: 'blue', '&:hover': {backgroundColor: 'red'}}}
                                 onClick={() => navigate("/listings")}>Listings</MenuItem>
-                            {GlobalState.userIsLogged  ? <MenuItem  color="inherit" sx={{alignSelf: 'end'}} onClick={() => navigate("/newlisting")}>
+                            {GlobalState.userIsLogged ? <MenuItem  color="inherit" sx={{alignSelf: 'end'}} onClick={() => navigate("/newlisting")}>
                                     adding new listing</MenuItem> : <MenuItem color="inherit" sx={{alignSelf: 'end'}} onClick={() => navigate("/SignUp")}>Sign
                                     Up</MenuItem>}
                                     {GlobalState.userIsLogged  ? <MenuItem color="inherit" sx={{alignSelf: 'end'}} onClick={handleClick}>
@@ -151,10 +151,10 @@ function Query() {
     if (display_lg || display_md || display_sm) {
         return (
             <Box sx={{flexGrow: 1}}>
-                <AppBar position='relative' sx={{backgroundColor:'#ed6b04'}}>
+                <AppBar position='relative' sx={styles.navMenuBar}>
                     <Toolbar>
                         <Button onClick={() => navigate("/")}>
-                            <Avatar sx={{bgcolor: deepOrange[500]}}>N</Avatar>
+                            <Avatar sx={styles.navMenuAvatar}>N</Avatar>
                         </Button>
                         <Grid container direction="row" justifyContent="flex-end" alignItems="center">
                             <Grid item>
@@ -176,11 +176,11 @@ function Query() {
                                 </Button>
                             </Grid>
                             <Grid item>
-                                {GlobalState.userIsLogged  ? <Button  color="inherit" sx={{alignSelf: 'end'}} onClick={() => navigate("/newlisting")}>
-                                    adding new listing</Button> : <Button color="inherit" sx={{alignSelf: 'end'}} onClick={() => navigate("/SignUp")}>Sign
+                                {GlobalState.userIsLogged  ? '' : <Button color="inherit" sx={{alignSelf: 'end'}} onClick={() => navigate("/SignUp")}>Sign
                                     Up</Button>}
                                 
                             </Grid>
+                            {console.log(GlobalState.data)}
                             <Grid item>
                             {GlobalState.userIsLogged  ? <Button color="inherit" sx={{alignSelf: 'end'}} onClick={handleClick}>
                                     {GlobalState.userUsername }</Button> : <Button color="inherit" sx={{alignSelf: 'end'}} onClick={() => navigate("/SignIn")}>Sign
